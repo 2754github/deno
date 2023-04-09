@@ -1,8 +1,14 @@
-import { serve } from 'https://deno.land/std@0.182.0/http/server.ts';
+import { Application, Router } from 'https://deno.land/x/oak@v12.1.0/mod.ts';
+import { jarvisHandler, jarvisValidate } from './webhooks/jarvis/index.ts';
 
-await serve(() => {
-  return new Response('Hello world!', {
-    headers: { 'content-type': 'text/plain' },
-    status: 200,
-  });
+const router = new Router();
+router.post('/webhooks/jarvis', async (ctx) => {
+  ctx.response.status = 200;
+  if (!jarvisValidate(ctx.request)) return;
+  await Promise.all((await ctx.request.body({ type: 'json' }).value).events.map(jarvisHandler));
 });
+
+const app = new Application();
+app.use(router.routes());
+app.use(router.allowedMethods());
+await app.listen({ port: 8000 });
