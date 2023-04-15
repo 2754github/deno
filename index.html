@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="description" content="文字数カウント" />
+    <meta property="og:title" content="tool palette" />
+    <meta property="og:description" content="文字数カウント" />
+    <meta property="og:url" content="https://2754.deno.dev/" />
+    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/1f3a8.png" />
+    <meta property="og:type" content="website" />
+    <link
+      href="data:image/svg+xml,&lt;svg viewBox=%220 0 100 100%22 xmlns=%22http://www.w3.org/2000/svg%22&gt;&lt;text style=%22dominant-baseline: central; text-anchor: middle; font-size: 100px%22 x=%2250%%22 y=%2250%%22&gt;🎨&lt;/text&gt;&lt;/svg&gt;"
+      rel="icon"
+    />
+    <title>tool palette</title>
+    <style>
+      html {
+        background-color: #ffffff;
+        transition: background-color 300ms, color 300ms;
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          filter: hue-rotate(180deg) invert(1);
+        }
+      }
+
+      pre {
+        font-size: 18px;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>tool palette</h1>
+    <hr />
+    <div>
+      <h2>文字数カウント</h2>
+      <textarea
+        cols="40"
+        id="word-counter-input"
+        rows="16"
+        aria-label="word-counter-input"
+        style="font-size: 16px"
+      ></textarea>
+      <pre><span id="word-counter-grapheme-output">0</span> 文字 (スペース・改行を含む)</pre>
+      <pre><span id="word-counter-word-output">0</span> 単語 (句読点を含む)</pre>
+      <pre><span id="word-counter-sentence-output">0</span> 文</pre>
+      <script>
+        const inputId = 'word-counter-input';
+        const graphemeOutputId = 'word-counter-grapheme-output';
+        const wordOutputId = 'word-counter-word-output';
+        const sentenceOutputId = 'word-counter-sentence-output';
+
+        const setCount = () => {
+          const input = document.getElementById(inputId).value;
+          localStorage.setItem(inputId, input);
+
+          const graphemeOutput = [
+            ...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(input),
+          ].length.toString();
+          const wordOutput = [
+            ...new Intl.Segmenter(undefined, { granularity: 'word' }).segment(input),
+          ].length.toString();
+          const sentenceOutput = [
+            ...new Intl.Segmenter(undefined, { granularity: 'sentence' }).segment(input),
+          ].length.toString();
+
+          const maxLength = Math.max(graphemeOutput.length, wordOutput.length, sentenceOutput.length);
+
+          document.getElementById(graphemeOutputId).innerHTML = graphemeOutput.padStart(maxLength);
+          document.getElementById(wordOutputId).innerHTML = wordOutput.padStart(maxLength);
+          document.getElementById(sentenceOutputId).innerHTML = sentenceOutput.padStart(maxLength);
+        };
+
+        window.onload = () => {
+          document.getElementById(inputId).innerHTML = localStorage.getItem(inputId);
+          setCount();
+        };
+        document.getElementById(inputId).onkeyup = setCount;
+        document.getElementById(inputId).onpaste = () => setTimeout(setCount, 10);
+      </script>
+    </div>
+  </body>
+</html>
